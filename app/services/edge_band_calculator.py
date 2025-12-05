@@ -17,8 +17,8 @@ def calculate_edge_breakdown_for_part(
     Returns:
         EdgeBandPart with detailed edge information
     """
-    # استخدام edge_overlap_mm من settings مباشرة
-    edge_overlap_mm = settings.edge_overlap_mm
+    # استخدام edge_overlap_cm من settings مباشرة
+    edge_overlap_cm = settings.edge_overlap_cm
     
     # تحديد توزيع الشريط
     if part.edge_distribution is None:
@@ -27,63 +27,63 @@ def calculate_edge_breakdown_for_part(
         edge_dist = part.edge_distribution
     
     edges = []
-    total_edge_mm = 0.0
+    total_edge_cm = 0.0
     
     # حساب كل حافة
     if edge_dist.top:
-        length_mm = part.width_mm + edge_overlap_mm
-        length_m = length_mm / 1000.0
+        length_cm = part.width_cm + edge_overlap_cm
+        length_m = length_cm / 100.0
         edges.append(EdgeDetail(
             edge="top",
-            length_mm=length_mm,
+            length_mm=length_cm * 10,  # Convert to mm for consistency
             length_m=length_m,
             edge_type=edge_type,
             has_edge=True
         ))
-        total_edge_mm += length_mm
+        total_edge_cm += length_cm
     
     if edge_dist.bottom:
-        length_mm = part.width_mm + edge_overlap_mm
-        length_m = length_mm / 1000.0
+        length_cm = part.width_cm + edge_overlap_cm
+        length_m = length_cm / 100.0
         edges.append(EdgeDetail(
             edge="bottom",
-            length_mm=length_mm,
+            length_mm=length_cm * 10,  # Convert to mm for consistency
             length_m=length_m,
             edge_type=edge_type,
             has_edge=True
         ))
-        total_edge_mm += length_mm
+        total_edge_cm += length_cm
     
     if edge_dist.left:
-        length_mm = part.height_mm + edge_overlap_mm
-        length_m = length_mm / 1000.0
+        length_cm = part.height_cm + edge_overlap_cm
+        length_m = length_cm / 100.0
         edges.append(EdgeDetail(
             edge="left",
-            length_mm=length_mm,
+            length_mm=length_cm * 10,  # Convert to mm for consistency
             length_m=length_m,
             edge_type=edge_type,
             has_edge=True
         ))
-        total_edge_mm += length_mm
+        total_edge_cm += length_cm
     
     if edge_dist.right:
-        length_mm = part.height_mm + edge_overlap_mm
-        length_m = length_mm / 1000.0
+        length_cm = part.height_cm + edge_overlap_cm
+        length_m = length_cm / 100.0
         edges.append(EdgeDetail(
             edge="right",
-            length_mm=length_mm,
+            length_mm=length_cm * 10,  # Convert to mm for consistency
             length_m=length_m,
             edge_type=edge_type,
             has_edge=True
         ))
-        total_edge_mm += length_mm
+        total_edge_cm += length_cm
     
     # إضافة حواف بدون شريط (للتوثيق فقط - لا تُضاف للـ total)
     if not edge_dist.top:
         edges.append(EdgeDetail(
             edge="top",
-            length_mm=part.width_mm,
-            length_m=part.width_mm / 1000.0,
+            length_mm=part.width_cm * 10,  # Convert to mm for consistency
+            length_m=part.width_cm / 100.0,
             edge_type=edge_type,
             has_edge=False
         ))
@@ -91,8 +91,8 @@ def calculate_edge_breakdown_for_part(
     if not edge_dist.bottom:
         edges.append(EdgeDetail(
             edge="bottom",
-            length_mm=part.width_mm,
-            length_m=part.width_mm / 1000.0,
+            length_mm=part.width_cm * 10,  # Convert to mm for consistency
+            length_m=part.width_cm / 100.0,
             edge_type=edge_type,
             has_edge=False
         ))
@@ -100,8 +100,8 @@ def calculate_edge_breakdown_for_part(
     if not edge_dist.left:
         edges.append(EdgeDetail(
             edge="left",
-            length_mm=part.height_mm,
-            length_m=part.height_mm / 1000.0,
+            length_mm=part.height_cm * 10,  # Convert to mm for consistency
+            length_m=part.height_cm / 100.0,
             edge_type=edge_type,
             has_edge=False
         ))
@@ -109,14 +109,14 @@ def calculate_edge_breakdown_for_part(
     if not edge_dist.right:
         edges.append(EdgeDetail(
             edge="right",
-            length_mm=part.height_mm,
-            length_m=part.height_mm / 1000.0,
+            length_mm=part.height_cm * 10,  # Convert to mm for consistency
+            length_m=part.height_cm / 100.0,
             edge_type=edge_type,
             has_edge=False
         ))
     
     # إجمالي متر الشريط للقطعة (مع الكمية)
-    total_edge_m = (total_edge_mm / 1000.0) * part.qty
+    total_edge_m = (total_edge_cm / 100.0) * part.qty
     
     return EdgeBandPart(
         part_name=part.name,
@@ -191,4 +191,3 @@ def calculate_edge_cost(
         "breakdown": cost_breakdown,
         "total": round(total_cost, 2)
     }
-

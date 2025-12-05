@@ -6,9 +6,9 @@ class InternalCounterPart(BaseModel):
     """قطعة داخلية من الكونتر"""
     name: str = Field(description="اسم القطعة (مثل: drawer_bottom, mirror_front, internal_shelf)")
     type: str = Field(description="نوع القطعة (drawer, mirror, shelf, base)")
-    width_mm: float = Field(description="العرض بالمليمتر")
-    height_mm: float = Field(description="الارتفاع بالمليمتر")
-    depth_mm: Optional[float] = Field(default=None, description="العمق بالمليمتر")
+    width_cm: float = Field(description="العرض بالسنتيمتر")
+    height_cm: float = Field(description="الارتفاع بالسنتيمتر")
+    depth_cm: Optional[float] = Field(default=None, description="العمق بالسنتيمتر")
     qty: int = Field(description="الكمية")
     cutting_dimensions: Optional[Dict[str, float]] = Field(
         default=None,
@@ -23,8 +23,8 @@ class InternalCounterOptions(BaseModel):
     add_base: bool = Field(default=True, description="إضافة قاعدة داخلية")
     add_internal_shelf: bool = Field(default=False, description="إضافة رف داخلي")
     drawer_count: int = Field(default=0, ge=0, description="عدد الأدراج")
-    back_clearance_mm: Optional[float] = Field(default=None, description="المسافة الخلفية (مم)")
-    expansion_gap_mm: Optional[float] = Field(default=3, description="مسافة التمدد (مم)")
+    back_clearance_cm: Optional[float] = Field(default=None, description="المسافة الخلفية (سم)")
+    expansion_gap_cm: Optional[float] = Field(default=0.3, description="مسافة التمدد (سم)")
 
 class InternalCounterRequest(BaseModel):
     """طلب حساب القطع الداخلية"""
@@ -44,4 +44,3 @@ class InternalCounterResponse(BaseModel):
         default_factory=dict,
         description="استخدام المواد"
     )
-

@@ -102,6 +102,24 @@ Once the server is running, visit:
 pytest
 ```
 
+## Measurement Units
+
+All measurements in the system are now in **centimeters (cm)** instead of millimeters (mm) for easier user input and better readability. Areas and edge band lengths are still calculated in square meters (m²) and meters (m) respectively for standard industry units.
+
+## Unit Types
+
+The system supports the following unit types:
+
+1. **Ground Units** (`ground`) - Standard floor-standing cabinets
+2. **Wall Units** (`wall`) - Wall-mounted cabinets
+3. **Double Door Units** (`double_door`) - Cabinets with two doors
+4. **Sink Ground Units** (`sink_ground`) - Floor-standing cabinets designed for sinks with:
+   - Specialized top panel for sink cutout (50x40 cm centered by default, configurable)
+   - Back panel with plumbing cutout (20x10 cm at bottom center by default, configurable)
+   - Reduced shelf count (one less shelf for drainage space)
+   - Default depth of 32cm (2cm more than standard ground units)
+   - Proper area calculations that account for cutouts without going negative
+
 ## API Examples
 
 ### Calculate Unit
@@ -110,13 +128,46 @@ pytest
 POST /units/calculate
 {
   "type": "ground",
-  "width_mm": 800,
-  "height_mm": 720,
-  "depth_mm": 300,
+  "width_cm": 60,
+  "height_cm": 72,
+  "depth_cm": 30,
   "shelf_count": 2,
   "options": {
-    "board_thickness_mm": 16,
-    "back_clearance_mm": 3
+    "board_thickness_cm": 1.6,
+    "back_clearance_cm": 0.3
+  }
+}
+```
+
+### Calculate Sink Unit
+
+```bash
+POST /units/calculate
+{
+  "type": "sink_ground",
+  "width_cm": 60,
+  "height_cm": 72,
+  "depth_cm": 32,
+  "shelf_count": 2,
+  "options": {}
+}
+```
+
+### Calculate Sink Unit with Custom Cutouts
+
+```bash
+POST /units/calculate
+{
+  "type": "sink_ground",
+  "width_cm": 60,
+  "height_cm": 72,
+  "depth_cm": 32,
+  "shelf_count": 3,
+  "options": {
+    "sink_cutout_width_cm": 40,
+    "sink_cutout_depth_cm": 30,
+    "plumbing_cutout_width_cm": 15,
+    "plumbing_cutout_height_cm": 8
   }
 }
 ```
@@ -127,9 +178,9 @@ POST /units/calculate
 POST /units/estimate
 {
   "type": "ground",
-  "width_mm": 800,
-  "height_mm": 720,
-  "depth_mm": 300,
+  "width_cm": 60,
+  "height_cm": 72,
+  "depth_cm": 30,
   "shelf_count": 2
 }
 ```
@@ -144,8 +195,8 @@ POST /units/{unit_id}/internal-counter/calculate
     "add_mirror": true,
     "add_internal_shelf": false,
     "drawer_count": 2,
-    "back_clearance_mm": 3,
-    "expansion_gap_mm": 3
+    "back_clearance_cm": 0.3,
+    "expansion_gap_cm": 0.3
   }
 }
 ```
@@ -169,9 +220,9 @@ Returns detailed edge band distribution for all parts:
 POST /summaries/generate
 {
   "type": "ground",
-  "width_mm": 800,
-  "height_mm": 720,
-  "depth_mm": 300,
+  "width_cm": 60,
+  "height_cm": 72,
+  "depth_cm": 30,
   "shelf_count": 2,
   "include_internal_counter": true,
   "internal_counter_options": {

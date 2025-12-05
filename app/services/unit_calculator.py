@@ -24,9 +24,9 @@ def calculate_piece_edge_meters(part: Part, settings: SettingsModel = None) -> f
     
     edge_length_m = 0.0
     
-    # تحويل من mm إلى m
-    width_m = part.width_mm / 1000.0
-    height_m = part.height_mm / 1000.0
+    # تحويل من cm إلى m
+    width_m = part.width_cm / 100.0
+    height_m = part.height_cm / 100.0
     
     # حساب محيط الحواف المطلوبة
     if edge_dist.top:
@@ -43,9 +43,9 @@ def calculate_piece_edge_meters(part: Part, settings: SettingsModel = None) -> f
 
 def calculate_unit_parts(
     unit_type: UnitType,
-    width_mm: float,
-    height_mm: float,
-    depth_mm: float,
+    width_cm: float,
+    height_cm: float,
+    depth_cm: float,
     shelf_count: int,
     settings: SettingsModel,
     options: Dict[str, Any] = None
@@ -61,29 +61,29 @@ def calculate_unit_parts(
     
     # استخراج القيم من options أو استخدام القيم من settings مباشرة
     # جميع القيم تأتي من settings كقيم افتراضية
-    board_thickness_mm = options.get(
-        "board_thickness_mm",
-        settings.default_board_thickness_mm
+    board_thickness_cm = options.get(
+        "board_thickness_cm",
+        settings.default_board_thickness_cm
     )
-    back_clearance_mm = options.get(
-        "back_clearance_mm",
-        settings.back_clearance_mm
+    back_clearance_cm = options.get(
+        "back_clearance_cm",
+        settings.back_clearance_cm
     )
-    top_clearance_mm = options.get(
-        "top_clearance_mm",
-        settings.top_clearance_mm
+    top_clearance_cm = options.get(
+        "top_clearance_cm",
+        settings.top_clearance_cm
     )
-    bottom_clearance_mm = options.get(
-        "bottom_clearance_mm",
-        settings.bottom_clearance_mm
+    bottom_clearance_cm = options.get(
+        "bottom_clearance_cm",
+        settings.bottom_clearance_cm
     )
-    side_overlap_mm = options.get(
-        "side_overlap_mm",
-        settings.side_overlap_mm
+    side_overlap_cm = options.get(
+        "side_overlap_cm",
+        settings.side_overlap_cm
     )
-    back_panel_thickness_mm = options.get(
-        "back_panel_thickness_mm",
-        settings.back_panel_thickness_mm
+    back_panel_thickness_cm = options.get(
+        "back_panel_thickness_cm",
+        settings.back_panel_thickness_cm
     )
     
     parts = []
@@ -93,77 +93,146 @@ def calculate_unit_parts(
     # عمق الجانب = عمق الوحدة
     side_panel = Part(
         name="side_panel",
-        width_mm=depth_mm,  # العرض = العمق
-        height_mm=height_mm,
+        width_cm=depth_cm,  # العرض = العمق
+        height_cm=height_cm,
         qty=2,
         edge_distribution=EdgeDistribution(top=True, left=True, right=True, bottom=True)
     )
-    side_panel.area_m2 = (side_panel.width_mm * side_panel.height_mm * side_panel.qty) / 1_000_000
+    side_panel.area_m2 = (side_panel.width_cm * side_panel.height_cm * side_panel.qty) / 10_000
     side_panel.edge_band_m = calculate_piece_edge_meters(side_panel)
     parts.append(side_panel)
     
     # 2. القاعدة والعلوية (Top/Bottom Panels)
     # عرض = عرض الوحدة - (2 * سمك الجانب)
-    top_bottom_width = width_mm - (2 * board_thickness_mm)
+    top_bottom_width = width_cm - (2 * board_thickness_cm)
     
     # القاعدة (Bottom)
     bottom_panel = Part(
         name="bottom_panel",
-        width_mm=top_bottom_width,
-        height_mm=depth_mm,  # الارتفاع = العمق
+        width_cm=top_bottom_width,
+        height_cm=depth_cm,  # الارتفاع = العمق
         qty=1,
         edge_distribution=EdgeDistribution(top=True, left=True, right=True, bottom=True)
     )
-    bottom_panel.area_m2 = (bottom_panel.width_mm * bottom_panel.height_mm * bottom_panel.qty) / 1_000_000
+    bottom_panel.area_m2 = (bottom_panel.width_cm * bottom_panel.height_cm * bottom_panel.qty) / 10_000
     bottom_panel.edge_band_m = calculate_piece_edge_meters(bottom_panel)
     parts.append(bottom_panel)
     
-    # العلوية (Top)
-    top_panel = Part(
-        name="top_panel",
-        width_mm=top_bottom_width,
-        height_mm=depth_mm,
-        qty=1,
-        edge_distribution=EdgeDistribution(top=True, left=True, right=True, bottom=True)
-    )
-    top_panel.area_m2 = (top_panel.width_mm * top_panel.height_mm * top_panel.qty) / 1_000_000
+    # العلوية (Top) - Special handling for sink units
+    if unit_type == UnitType.SINK_GROUND:
+        # For sink units, the top panel has a sink cutout (50x40 cm centered)
+        # Extract sink cutout dimensions from options or use defaults
+        sink_cutout_width_cm = options.get("sink_cutout_width_cm", 50)  # 50 cm default
+        sink_cutout_depth_cm = options.get("sink_cutout_depth_cm", 40)  # 40 cm default
+        
+        top_panel = Part(
+            name="top_panel_sink",
+            width_cm=top_bottom_width,
+            height_cm=depth_cm,
+            qty=1,
+            edge_distribution=EdgeDistribution(top=True, left=True, right=True, bottom=True)
+        )
+        
+        # Calculate area considering the sink cutout
+        # Total area minus cutout area (but ensure cutout doesn't exceed panel area)
+        total_top_area = top_bottom_width * depth_cm
+        # Limit cutout to panel dimensions to prevent negative areas
+        actual_cutout_width = min(sink_cutout_width_cm, top_bottom_width)
+        actual_cutout_depth = min(sink_cutout_depth_cm, depth_cm)
+        sink_cutout_area = actual_cutout_width * actual_cutout_depth
+        top_panel_area = max(0, total_top_area - sink_cutout_area)  # Ensure non-negative area
+        top_panel.area_m2 = (top_panel_area * top_panel.qty) / 10_000
+    else:
+        top_panel = Part(
+            name="top_panel",
+            width_cm=top_bottom_width,
+            height_cm=depth_cm,
+            qty=1,
+            edge_distribution=EdgeDistribution(top=True, left=True, right=True, bottom=True)
+        )
+        top_panel.area_m2 = (top_panel.width_cm * top_panel.height_cm * top_panel.qty) / 10_000
+    
     top_panel.edge_band_m = calculate_piece_edge_meters(top_panel)
     parts.append(top_panel)
     
-    # 3. الرفوف (Shelves)
+    # 3. الرفوف (Shelves) - Special handling for sink units
     # عرض الرف = عرض القاعدة/العلوية
     # عمق الرف = عمق الوحدة - المسافة الخلفية
     shelf_width = top_bottom_width
-    shelf_depth = depth_mm - back_clearance_mm
+    shelf_depth = depth_cm - back_clearance_cm
     
-    for i in range(shelf_count):
-        shelf = Part(
-            name=f"shelf_{i+1}",
-            width_mm=shelf_width,
-            height_mm=shelf_depth,  # الارتفاع = العمق
-            qty=1,
-            edge_distribution=EdgeDistribution(top=True, left=True, right=True, bottom=False)  # لا شريط من الأسفل
-        )
-        shelf.area_m2 = (shelf.width_mm * shelf.height_mm * shelf.qty) / 1_000_000
-        shelf.edge_band_m = calculate_piece_edge_meters(shelf)
-        parts.append(shelf)
+    # For sink units, reduce shelves by 1 or make bottom shelf half-depth
+    if unit_type == UnitType.SINK_GROUND:
+        # Reduce shelf count by 1 for sink units (remove bottom shelf)
+        effective_shelf_count = max(0, shelf_count - 1)
+        for i in range(effective_shelf_count):
+            shelf_num = i + 1
+            shelf = Part(
+                name=f"shelf_{shelf_num}",
+                width_cm=shelf_width,
+                height_cm=shelf_depth,  # الارتفاع = العمق
+                qty=1,
+                edge_distribution=EdgeDistribution(top=True, left=True, right=True, bottom=False)  # لا شريط من الأسفل
+            )
+            shelf.area_m2 = (shelf.width_cm * shelf.height_cm * shelf.qty) / 10_000
+            shelf.edge_band_m = calculate_piece_edge_meters(shelf)
+            parts.append(shelf)
+    else:
+        # Regular units - all shelves full depth
+        for i in range(shelf_count):
+            shelf = Part(
+                name=f"shelf_{i+1}",
+                width_cm=shelf_width,
+                height_cm=shelf_depth,  # الارتفاع = العمق
+                qty=1,
+                edge_distribution=EdgeDistribution(top=True, left=True, right=True, bottom=False)  # لا شريط من الأسفل
+            )
+            shelf.area_m2 = (shelf.width_cm * shelf.height_cm * shelf.qty) / 10_000
+            shelf.edge_band_m = calculate_piece_edge_meters(shelf)
+            parts.append(shelf)
     
-    # 4. الظهر (Back Panel)
+    # 4. الظهر (Back Panel) - Special handling for sink units
     # عرض = عرض الوحدة - (2 * تداخل الجوانب)
     # ارتفاع = ارتفاع الوحدة - المسافة العلوية - المسافة السفلية
-    # سمك الظهر يأتي من settings.back_panel_thickness_mm
-    back_width = width_mm - (2 * side_overlap_mm)
-    back_height = height_mm - top_clearance_mm - bottom_clearance_mm
+    # سمك الظهر يأتي من settings.back_panel_thickness_cm
+    back_width = width_cm - (2 * side_overlap_cm)
+    back_height = height_cm - top_clearance_cm - bottom_clearance_cm
     
-    back_panel = Part(
-        name="back_panel",
-        width_mm=back_width,
-        height_mm=back_height,
-        depth_mm=back_panel_thickness_mm,  # استخدام سمك الظهر من settings
-        qty=1,
-        edge_distribution=EdgeDistribution(top=False, left=False, right=False, bottom=False)  # الظهر عادة بدون شريط
-    )
-    back_panel.area_m2 = (back_panel.width_mm * back_panel.height_mm * back_panel.qty) / 1_000_000
+    if unit_type == UnitType.SINK_GROUND:
+        # For sink units, back panel has plumbing cutout (20x10 cm at bottom center)
+        # Extract plumbing cutout dimensions from options or use defaults
+        plumbing_cutout_width_cm = options.get("plumbing_cutout_width_cm", 20)  # 20 cm default
+        plumbing_cutout_height_cm = options.get("plumbing_cutout_height_cm", 10)  # 10 cm default
+        
+        back_panel = Part(
+            name="back_panel_sink",
+            width_cm=back_width,
+            height_cm=back_height,
+            depth_cm=back_panel_thickness_cm,  # استخدام سمك الظهر من settings
+            qty=1,
+            edge_distribution=EdgeDistribution(top=False, left=False, right=False, bottom=False)  # الظهر عادة بدون شريط
+        )
+        
+        # Calculate area considering the plumbing cutout
+        # Total area minus cutout area (but ensure cutout doesn't exceed panel area)
+        total_back_area = back_width * back_height
+        # Limit cutout to panel dimensions to prevent negative areas
+        actual_plumbing_width = min(plumbing_cutout_width_cm, back_width)
+        actual_plumbing_height = min(plumbing_cutout_height_cm, back_height)
+        plumbing_cutout_area = actual_plumbing_width * actual_plumbing_height
+        back_panel_area = max(0, total_back_area - plumbing_cutout_area)  # Ensure non-negative area
+        back_panel.area_m2 = (back_panel_area * back_panel.qty) / 10_000
+    else:
+        back_panel = Part(
+            name="back_panel",
+            width_cm=back_width,
+            height_cm=back_height,
+            depth_cm=back_panel_thickness_cm,  # استخدام سمك الظهر من settings
+            qty=1,
+            edge_distribution=EdgeDistribution(top=False, left=False, right=False, bottom=False)  # الظهر عادة بدون شريط
+        )
+        back_panel.area_m2 = (back_panel.width_cm * back_panel.height_cm * back_panel.qty) / 10_000
+    
     back_panel.edge_band_m = calculate_piece_edge_meters(back_panel)
     parts.append(back_panel)
     
@@ -202,8 +271,7 @@ def calculate_material_usage(
     plywood_sheets = (total_area_m2 / sheet_size_m2) if sheet_size_m2 > 0 else 0
     
     return {
-        "plywood_sheets": round(plywood_sheets, 2),
-        "edge_m": round(edge_band_m, 2),
-        "total_area_m2": round(total_area_m2, 4)
+        "ألواح الخشب": round(plywood_sheets, 2),
+        "شريط الحافة": round(edge_band_m, 2),
+        "المساحة الإجمالية": round(total_area_m2, 4)
     }
-

@@ -130,13 +130,13 @@ def generate_summary(
         total_area_m2 += internal_area_m2
         
         # دمج استخدام المواد
-        material_usage["plywood_sheets"] = round(
-            material_usage.get("plywood_sheets", 0) + 
-            internal_material_usage.get("plywood_sheets", 0), 2
+        material_usage["ألواح الخشب"] = round(
+            material_usage.get("ألواح الخشب", 0) + 
+            internal_material_usage.get("ألواح الخشب", 0), 2
         )
-        material_usage["edge_m"] = round(
-            material_usage.get("edge_m", 0) + 
-            internal_material_usage.get("edge_m", 0), 2
+        material_usage["شريط الحافة"] = round(
+            material_usage.get("شريط الحافة", 0) + 
+            internal_material_usage.get("شريط الحافة", 0), 2
         )
     
     # حساب التكاليف
@@ -146,7 +146,7 @@ def generate_summary(
     if "plywood_sheet" in settings.materials:
         plywood_price = settings.materials["plywood_sheet"].price_per_sheet
         if plywood_price:
-            plywood_cost = material_usage["plywood_sheets"] * plywood_price
+            plywood_cost = material_usage["ألواح الخشب"] * plywood_price
             costs["material_cost"] = round(plywood_cost, 2)
     
     # تكلفة الشريط

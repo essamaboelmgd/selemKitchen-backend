@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import connect_to_mongo, close_mongo_connection
-from app.routers import settings, units, summaries
+from app.routers import settings, units, summaries, projects, auth, dashboard
 
 app = FastAPI(
     title="Kitchen Cabinet Calculator API",
@@ -22,6 +22,9 @@ app.add_middleware(
 app.include_router(settings.router, prefix="/settings", tags=["Settings"])
 app.include_router(units.router, prefix="/units", tags=["Units"])
 app.include_router(summaries.router, prefix="/summaries", tags=["Summaries"])
+app.include_router(projects.router, prefix="/projects", tags=["Projects"])
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+app.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 
 @app.on_event("startup")
 async def startup_event():
@@ -38,4 +41,3 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
-

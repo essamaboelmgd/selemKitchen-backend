@@ -261,13 +261,13 @@ async def test_summary_material_usage():
     
     # Check material usage
     material_usage = data["material_usage"]
-    assert "plywood_sheets" in material_usage
-    assert "edge_m" in material_usage
-    assert "total_area_m2" in material_usage
+    assert "ألواح الخشب" in material_usage
+    assert "شريط الحافة" in material_usage
+    assert "المساحة الإجمالية" in material_usage
     
-    assert material_usage["plywood_sheets"] >= 0
-    assert material_usage["edge_m"] >= 0
-    assert material_usage["total_area_m2"] > 0
+    assert material_usage["ألواح الخشب"] >= 0
+    assert material_usage["شريط الحافة"] >= 0
+    assert material_usage["المساحة الإجمالية"] > 0
 
 @pytest.mark.asyncio
 async def test_summary_invalid_dimensions():

@@ -19,9 +19,9 @@ async def test_calculate_ground_unit():
     """Test calculating a ground unit"""
     request_data = {
         "type": "ground",
-        "width_mm": 800,
-        "height_mm": 720,
-        "depth_mm": 300,
+        "width_cm": 80,
+        "height_cm": 72,
+        "depth_cm": 30,
         "shelf_count": 2,
         "options": {}
     }
@@ -33,9 +33,9 @@ async def test_calculate_ground_unit():
     # Check response structure
     assert "unit_id" in data
     assert data["type"] == "ground"
-    assert data["width_mm"] == 800
-    assert data["height_mm"] == 720
-    assert data["depth_mm"] == 300
+    assert data["width_cm"] == 80
+    assert data["height_cm"] == 72
+    assert data["depth_cm"] == 30
     assert data["shelf_count"] == 2
     
     # Check parts
@@ -66,9 +66,9 @@ async def test_calculate_wall_unit():
     """Test calculating a wall unit"""
     request_data = {
         "type": "wall",
-        "width_mm": 600,
-        "height_mm": 500,
-        "depth_mm": 250,
+        "width_cm": 60,
+        "height_cm": 50,
+        "depth_cm": 25,
         "shelf_count": 1,
         "options": {}
     }
@@ -78,9 +78,9 @@ async def test_calculate_wall_unit():
     data = response.json()
     
     assert data["type"] == "wall"
-    assert data["width_mm"] == 600
-    assert data["height_mm"] == 500
-    assert data["depth_mm"] == 250
+    assert data["width_cm"] == 60
+    assert data["height_cm"] == 50
+    assert data["depth_cm"] == 25
     assert data["shelf_count"] == 1
     
     # Check parts
@@ -93,9 +93,9 @@ async def test_calculate_double_door_unit():
     """Test calculating a double door unit"""
     request_data = {
         "type": "double_door",
-        "width_mm": 1000,
-        "height_mm": 800,
-        "depth_mm": 350,
+        "width_cm": 100,
+        "height_cm": 80,
+        "depth_cm": 35,
         "shelf_count": 3,
         "options": {}
     }
@@ -105,7 +105,7 @@ async def test_calculate_double_door_unit():
     data = response.json()
     
     assert data["type"] == "double_door"
-    assert data["width_mm"] == 1000
+    assert data["width_cm"] == 100
     assert data["shelf_count"] == 3
     
     # Check shelves
@@ -117,13 +117,13 @@ async def test_calculate_unit_with_options():
     """Test calculating unit with custom options"""
     request_data = {
         "type": "ground",
-        "width_mm": 800,
-        "height_mm": 720,
-        "depth_mm": 300,
+        "width_cm": 80,
+        "height_cm": 72,
+        "depth_cm": 30,
         "shelf_count": 2,
         "options": {
-            "board_thickness_mm": 18,
-            "back_clearance_mm": 5
+            "board_thickness_cm": 1.8,
+            "back_clearance_cm": 0.5
         }
     }
     
@@ -137,16 +137,16 @@ async def test_calculate_unit_with_options():
     top_panel = next((p for p in data["parts"] if p["name"] == "top_panel"), None)
     assert top_panel is not None
     # Width should be less than unit width due to side thickness
-    assert top_panel["width_mm"] < 800
+    assert top_panel["width_cm"] < 80
 
 @pytest.mark.asyncio
 async def test_calculate_unit_invalid_dimensions():
     """Test calculating unit with invalid dimensions"""
     request_data = {
         "type": "ground",
-        "width_mm": -100,  # Invalid
-        "height_mm": 720,
-        "depth_mm": 300,
+        "width_cm": -10,  # Invalid
+        "height_cm": 72,
+        "depth_cm": 30,
         "shelf_count": 2
     }
     
@@ -159,9 +159,9 @@ async def test_get_unit_by_id():
     # First create a unit
     request_data = {
         "type": "ground",
-        "width_mm": 800,
-        "height_mm": 720,
-        "depth_mm": 300,
+        "width_cm": 80,
+        "height_cm": 72,
+        "depth_cm": 30,
         "shelf_count": 2
     }
     
@@ -177,7 +177,7 @@ async def test_get_unit_by_id():
     
     assert data["unit_id"] == unit_id
     assert data["type"] == "ground"
-    assert data["width_mm"] == 800
+    assert data["width_cm"] == 80
     assert len(data["parts"]) > 0
 
 @pytest.mark.asyncio
@@ -206,9 +206,9 @@ async def test_estimate_unit_cost():
     # Estimate unit cost
     request_data = {
         "type": "ground",
-        "width_mm": 800,
-        "height_mm": 720,
-        "depth_mm": 300,
+        "width_cm": 80,
+        "height_cm": 72,
+        "depth_cm": 30,
         "shelf_count": 2
     }
     
@@ -238,9 +238,9 @@ async def test_estimate_unit_cost_no_prices():
     
     request_data = {
         "type": "ground",
-        "width_mm": 800,
-        "height_mm": 720,
-        "depth_mm": 300,
+        "width_cm": 80,
+        "height_cm": 72,
+        "depth_cm": 30,
         "shelf_count": 2
     }
     
@@ -257,9 +257,9 @@ async def test_calculate_unit_parts_structure():
     """Test that calculated parts have correct structure"""
     request_data = {
         "type": "ground",
-        "width_mm": 800,
-        "height_mm": 720,
-        "depth_mm": 300,
+        "width_cm": 80,
+        "height_cm": 72,
+        "depth_cm": 30,
         "shelf_count": 2
     }
     
@@ -270,11 +270,11 @@ async def test_calculate_unit_parts_structure():
     # Check each part structure
     for part in data["parts"]:
         assert "name" in part
-        assert "width_mm" in part
-        assert "height_mm" in part
+        assert "width_cm" in part
+        assert "height_cm" in part
         assert "qty" in part
-        assert part["width_mm"] > 0
-        assert part["height_mm"] > 0
+        assert part["width_cm"] > 0
+        assert part["height_cm"] > 0
         assert part["qty"] > 0
         
         # Check optional fields if present
@@ -283,3 +283,117 @@ async def test_calculate_unit_parts_structure():
         if "area_m2" in part:
             assert part["area_m2"] >= 0
 
+@pytest.mark.asyncio
+async def test_calculate_sink_ground_unit():
+    """Test calculating a sink ground unit"""
+    request_data = {
+        "type": "sink_ground",
+        "width_cm": 60,
+        "height_cm": 72,
+        "depth_cm": 32,  # Slightly deeper for sink
+        "shelf_count": 2,  # Should be reduced by 1 in calculation
+        "options": {}
+    }
+    
+    response = client.post("/units/calculate", json=request_data)
+    assert response.status_code == 200
+    data = response.json()
+    
+    # Check response structure
+    assert "unit_id" in data
+    assert data["type"] == "sink_ground"
+    assert data["width_cm"] == 60
+    assert data["height_cm"] == 72
+    assert data["depth_cm"] == 32
+    assert data["shelf_count"] == 2
+    
+    # Check parts
+    assert "parts" in data
+    assert isinstance(data["parts"], list)
+    assert len(data["parts"]) > 0
+    
+    # Check for expected parts with sink-specific names
+    part_names = [part["name"] for part in data["parts"]]
+    assert "side_panel" in part_names
+    assert "top_panel_sink" in part_names  # Sink-specific naming
+    assert "bottom_panel" in part_names
+    assert "back_panel_sink" in part_names  # Sink-specific naming
+    
+    # Check shelves - should be reduced by 1 for sink units
+    shelf_parts = [p for p in data["parts"] if p["name"].startswith("shelf")]
+    # With shelf_count=2, sink units should have 1 shelf (2-1=1)
+    assert len(shelf_parts) == 1
+    
+    # Check that areas are positive (no negative areas due to cutouts)
+    for part in data["parts"]:
+        assert part["area_m2"] >= 0
+    
+    # Check totals
+    assert "total_edge_band_m" in data
+    assert data["total_edge_band_m"] > 0
+    assert "total_area_m2" in data
+    assert data["total_area_m2"] > 0
+    assert "material_usage" in data
+
+@pytest.mark.asyncio
+async def test_calculate_sink_ground_unit_with_custom_cutouts():
+    """Test calculating a sink ground unit with custom cutout sizes"""
+    request_data = {
+        "type": "sink_ground",
+        "width_cm": 60,
+        "height_cm": 72,
+        "depth_cm": 32,
+        "shelf_count": 3,
+        "options": {
+            "sink_cutout_width_cm": 40,
+            "sink_cutout_depth_cm": 30,
+            "plumbing_cutout_width_cm": 15,
+            "plumbing_cutout_height_cm": 8
+        }
+    }
+    
+    response = client.post("/units/calculate", json=request_data)
+    assert response.status_code == 200
+    data = response.json()
+    
+    # Check shelves - should have 2 shelves (3-1=2)
+    shelf_parts = [p for p in data["parts"] if p["name"].startswith("shelf")]
+    assert len(shelf_parts) == 2
+    
+    # Check that the unit type is correctly identified
+    assert data["type"] == "sink_ground"
+    
+    # Check that areas are positive
+    for part in data["parts"]:
+        assert part["area_m2"] >= 0
+
+@pytest.mark.asyncio
+async def test_calculate_sink_ground_unit_with_shelf():
+    """Test calculating a sink ground unit with a shelf"""
+    request_data = {
+        "type": "sink_ground",
+        "width_cm": 60,
+        "height_cm": 72,
+        "depth_cm": 32,
+        "shelf_count": 3,
+        "options": {}
+    }
+    
+    response = client.post("/units/calculate", json=request_data)
+    assert response.status_code == 200
+    data = response.json()
+    
+    # Check shelves - should have 2 shelves (3-1=2)
+    shelf_parts = [p for p in data["parts"] if p["name"].startswith("shelf")]
+    assert len(shelf_parts) == 2
+    
+    # Check that the unit type is correctly identified
+    assert data["type"] == "sink_ground"
+    
+    # Check that all part areas are non-negative
+    for part in data["parts"]:
+        if "area_m2" in part:
+            assert part["area_m2"] >= 0
+        if "area_m2" in part and part["name"] == "top_panel_sink":
+            # Top panel should have a smaller area due to sink cutout
+            assert part["area_m2"] > 0
