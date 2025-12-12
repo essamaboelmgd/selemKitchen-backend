@@ -45,6 +45,37 @@ async def get_admin_user(token: str) -> TokenData:
         )
     return token_data
 
+async def get_current_user(authorization: str = Header(None)) -> UserResponse:
+    """Dependency to get current user from token"""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization header", 
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    token = authorization[len("Bearer "):]
+    token_data = await get_current_user_from_token(token)
+    
+    user = await get_user_by_id(token_data.user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
+    return UserResponse(
+        user_id=user.id,
+        phone=user.phone,
+        full_name=user.full_name,
+        role=user.role,
+        subscription=user.subscription,
+        devices=user.devices,
+        created_at=user.created_at,
+        updated_at=user.updated_at
+    )
+
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(request: UserCreateRequest):
     """

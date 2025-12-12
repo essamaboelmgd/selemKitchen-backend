@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 
 class Settings(BaseSettings):
-    mongodb_url: str = "mongodb://admin:admin123@localhost:27017/?authSource=admin"
+    mongodb_url: str = "mongodb://127.0.0.1:27017/"
     database_name: str = "kitchen_db"
     
     class Config:

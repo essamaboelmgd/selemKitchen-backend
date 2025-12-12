@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import connect_to_mongo, close_mongo_connection
-from app.routers import settings, units, summaries, projects, auth, dashboard
+from app.routers import settings, units, summaries, projects, auth, dashboard, marketplace
 
 app = FastAPI(
     title="Kitchen Cabinet Calculator API",
@@ -25,6 +25,7 @@ app.include_router(summaries.router, prefix="/summaries", tags=["Summaries"])
 app.include_router(projects.router, prefix="/projects", tags=["Projects"])
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
+app.include_router(marketplace.router, prefix="/marketplace", tags=["Marketplace"])
 
 @app.on_event("startup")
 async def startup_event():
