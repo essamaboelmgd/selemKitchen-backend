@@ -105,6 +105,25 @@ async def get_my_orders(
         ) for item in items
     ]
 
+@router.get("/my-listings", response_model=List[MarketplaceItemResponse])
+async def get_my_listings(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    current_user: UserResponse = Depends(get_current_user),
+    service: MarketplaceService = Depends(get_marketplace_service)
+):
+    """
+    Get all items listed by the current user (My Listings).
+    """
+    items = await service.get_items_by_owner(seller_id=current_user.user_id, skip=skip, limit=limit)
+    return [
+        MarketplaceItemResponse(
+            item_id=item.id,
+            seller_name=current_user.full_name, # Optimization: we know the seller is the current user
+            **item.model_dump(exclude={'id'})
+        ) for item in items
+    ]
+
 @router.get("/sales", response_model=List[MarketplaceItemResponse])
 async def get_my_sales(
     skip: int = Query(0, ge=0),

@@ -58,6 +58,15 @@ class MarketplaceService:
             items.append(MarketplaceItemDocument(**doc))
         return items
 
+    async def get_items_by_owner(self, seller_id: str, skip: int = 0, limit: int = 20) -> List[MarketplaceItemDocument]:
+        """Get all items listed by a specific seller (owner) regardless of status"""
+        query = {"seller_id": seller_id}
+        cursor = self.collection.find(query).skip(skip).limit(limit).sort("created_at", -1)
+        items = []
+        async for doc in cursor:
+            items.append(MarketplaceItemDocument(**doc))
+        return items
+
     async def get_items_by_seller(self, seller_id: str, skip: int = 0, limit: int = 20) -> List[MarketplaceItemDocument]:
         # Get items sold by this seller
         query = {"seller_id": seller_id, "status": {"$in": [ItemStatus.SOLD, ItemStatus.PENDING]}}
