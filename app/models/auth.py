@@ -24,6 +24,7 @@ class SubscriptionPlan(BaseModel):
     validity_days: Optional[int] = Field(default=None, description="مدة الصلاحية بالأيام")
     is_unlimited_units: bool = Field(default=False, description="عدد غير محدود من الوحدات")
     is_unlimited_devices: bool = Field(default=False, description="عدد غير محدود من الأجهزة")
+    unlimited_expiry_date: Optional[datetime] = Field(default=None, description="تاريخ انتهاء الصلاحية اللانهائية")
 
 class UserCreateRequest(BaseModel):
     """طلب إنشاء مستخدم جديد"""

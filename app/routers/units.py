@@ -129,16 +129,23 @@ async def calculate_unit(request: UnitCalculateRequest, authorization: str = Hea
                 # Get user to check subscription limits (non-admin users only)
                 if token_data.role != "admin":
                     user = await get_user_by_id(token_data.user_id)
-                    if user and not user.subscription.is_unlimited_units:
-                        # Get user's current unit count for the month
-                        current_units_count = await get_user_units_count(token_data.user_id, 30)
+                    if user:
+                        # Check unlimited expiry
+                        is_unlimited = user.subscription.is_unlimited_units
+                        if is_unlimited and user.subscription.unlimited_expiry_date:
+                            if datetime.utcnow() > user.subscription.unlimited_expiry_date:
+                                is_unlimited = False
                         
-                        # Check if user has reached their limit
-                        if current_units_count >= user.subscription.max_units_per_month:
-                            raise HTTPException(
-                                status_code=status.HTTP_403_FORBIDDEN,
-                                detail=f"لقد بلغت الحد الأقصى من الوحدات ({user.subscription.max_units_per_month} وحدة/شهر). يرجى التواصل مع المسؤول لزيادة الحد."
-                            )
+                        if not is_unlimited:
+                            # Get user's current unit count for the month
+                            current_units_count = await get_user_units_count(token_data.user_id, 30)
+                            
+                            # Check if user has reached their limit
+                            if current_units_count >= user.subscription.max_units_per_month:
+                                raise HTTPException(
+                                    status_code=status.HTTP_403_FORBIDDEN,
+                                    detail=f"لقد بلغت الحد الأقصى من الوحدات ({user.subscription.max_units_per_month} وحدة/شهر). يرجى التواصل مع المسؤول لزيادة الحد."
+                                )
             except:
                 # If token is invalid, continue without user tracking
                 pass
@@ -218,16 +225,23 @@ async def estimate_unit_cost(request: UnitEstimateRequest, authorization: str = 
                 # Get user to check subscription limits (non-admin users only)
                 if token_data.role != "admin":
                     user = await get_user_by_id(token_data.user_id)
-                    if user and not user.subscription.is_unlimited_units:
-                        # Get user's current unit count for the month
-                        current_units_count = await get_user_units_count(token_data.user_id, 30)
-                        
-                        # Check if user has reached their limit
-                        if current_units_count >= user.subscription.max_units_per_month:
-                            raise HTTPException(
-                                status_code=status.HTTP_403_FORBIDDEN,
-                                detail=f"لقد بلغت الحد الأقصى من الوحدات ({user.subscription.max_units_per_month} وحدة/شهر). يرجى التواصل مع المسؤول لزيادة الحد."
-                            )
+                    if user:
+                        # Check unlimited expiry
+                        is_unlimited = user.subscription.is_unlimited_units
+                        if is_unlimited and user.subscription.unlimited_expiry_date:
+                            if datetime.utcnow() > user.subscription.unlimited_expiry_date:
+                                is_unlimited = False
+
+                        if not is_unlimited:
+                            # Get user's current unit count for the month
+                            current_units_count = await get_user_units_count(token_data.user_id, 30)
+                            
+                            # Check if user has reached their limit
+                            if current_units_count >= user.subscription.max_units_per_month:
+                                raise HTTPException(
+                                    status_code=status.HTTP_403_FORBIDDEN,
+                                    detail=f"لقد بلغت الحد الأقصى من الوحدات ({user.subscription.max_units_per_month} وحدة/شهر). يرجى التواصل مع المسؤول لزيادة الحد."
+                                )
             except:
                 # If token is invalid, continue without user tracking
                 pass
