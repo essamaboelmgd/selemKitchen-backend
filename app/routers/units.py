@@ -77,7 +77,13 @@ async def get_settings_model() -> SettingsModel:
     from app.routers.settings import get_settings_from_db
     settings_doc = await get_settings_from_db()
     settings_doc.pop("_id", None)
-    return SettingsModel(**settings_doc)
+    
+    try:
+        return SettingsModel(**settings_doc)
+    except Exception as validation_error:
+         # If DB data is invalid/outdated, log it and return defaults
+        print(f"WARNING: Settings validation failed in units router: {validation_error}. Returning defaults.")
+        return SettingsModel()
 
 @router.get("/types", response_model=List[Dict[str, str]])
 async def get_unit_types():
