@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.database import connect_to_mongo, close_mongo_connection
-from app.routers import settings, units, summaries, projects, auth, dashboard, marketplace, cart
+from app.routers import settings, units, summaries, projects, auth, dashboard, marketplace, cart, ads
 import os
 
 app = FastAPI(
@@ -34,6 +34,7 @@ app.include_router(units.router, prefix="/units", tags=["Units"])
 app.include_router(marketplace.router, prefix="/marketplace", tags=["Marketplace"])
 app.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 app.include_router(cart.router, prefix="/cart", tags=["Cart"])
+app.include_router(ads.router, prefix="/ads", tags=["Ads"])
 
 @app.on_event("startup")
 async def startup_event():
