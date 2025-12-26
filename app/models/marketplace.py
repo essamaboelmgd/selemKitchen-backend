@@ -48,6 +48,7 @@ class MarketplaceItemResponse(BaseModel):
     item_id: str
     seller_id: str
     seller_name: Optional[str] = None # To display seller name
+    seller_phone: Optional[str] = None # To display seller phone
     title: str
     description: str
     price: float

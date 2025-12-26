@@ -79,7 +79,22 @@ class MarketplaceService:
     async def get_item_by_id(self, item_id: str) -> Optional[MarketplaceItemDocument]:
         doc = await self.collection.find_one({"_id": item_id})
         if doc:
-            return MarketplaceItemDocument(**doc)
+            # Fetch seller phone
+            seller = await self.db.users.find_one({"_id": doc["seller_id"]})
+            item_doc = MarketplaceItemDocument(**doc)
+            
+            # We need to manually inject seller phone/name into the response logic
+            # Since MarketplaceItemDocument doesn't have seller_phone (it's DB model),
+            # we handle this mapping in the Router usually, OR we extend the logic here.
+            # To keep it clean, let's return the doc, and let the Router fetch details?
+            # NO, better to handle it here if we change the return type or just attach it.
+            # But the method returns MarketplaceItemDocument which matches DB schema.
+            # I will modify the router to fetch seller details or modify this method to return a dict/enriched object.
+            
+            # Actually, the Router `get_item` uses `service.get_item_by_id`.
+            # And expects `MarketplaceItemResponse`.
+            # Let's modify the Router `get_item` to fetch seller info.
+            return item_doc
         return None
 
     async def update_item(self, item_id: str, user_id: str, update_data: MarketplaceItemUpdate) -> Optional[MarketplaceItemDocument]:

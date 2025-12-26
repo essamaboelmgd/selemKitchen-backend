@@ -170,8 +170,15 @@ async def get_item(
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
         
+    # Fetch seller details
+    seller = await service.db.users.find_one({"_id": item.seller_id})
+    seller_phone = seller.get("phone") if seller else None
+    seller_name = seller.get("full_name") if seller else None
+    
     return MarketplaceItemResponse(
         item_id=item.id,
+        seller_phone=seller_phone,
+        seller_name=seller_name,
         **item.model_dump(exclude={'id'})
     )
 
