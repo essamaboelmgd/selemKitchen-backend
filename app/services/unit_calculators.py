@@ -618,26 +618,21 @@ def calculate_unit_parts(
         oven_height: ارتفاع الفرن
         microwave_height: ارتفاع الميكرويف
         vent_height: ارتفاع الهواية
-        drawer_count: عدد الأدراج
-        drawer_height_cm: ارتفاع الدرج
-        fixed_part_cm: الجزء الثابت
-        width_2_cm: العرض 2 (للركنة)
-        depth_2_cm: العمق 2 (للركنة)
-        settings: الإعدادات
-    
-    Returns:
-        قائمة الأجزاء المحسوبة
+    دالة موحدة لحساب أجزاء أي وحدة وتطبيق خصومات الشريط
     """
+    parts = []
+    
+    # تحديد نوع الوحدة وحساب الأجزاء
     if unit_type == "ground":
-        return calculate_ground_unit(
+        parts = calculate_ground_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count, settings
         )
     elif unit_type == "sink":
-        return calculate_sink_unit(
+        parts = calculate_sink_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count, settings
         )
     elif unit_type == "wall":
-        return calculate_wall_unit(
+        parts = calculate_wall_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count, door_type, settings
         )
     elif unit_type == "drawers":
@@ -646,108 +641,129 @@ def calculate_unit_parts(
             drawer_count, drawer_height_cm, settings
         )
     elif unit_type == "drawers_bottom_rail":
-        return calculate_drawers_bottom_rail_unit(
+        parts = calculate_drawers_bottom_rail_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count,
             drawer_count, drawer_height_cm, settings
         )
     elif unit_type == "ground_fixed":
-        return calculate_ground_fixed_unit(
+        parts = calculate_ground_fixed_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count,
             fixed_part_cm, settings
         )
     elif unit_type == "sink_fixed":
-        return calculate_sink_fixed_unit(
+        parts = calculate_sink_fixed_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count,
             fixed_part_cm, settings
         )
     elif unit_type == "wall_fixed":
-        return calculate_wall_fixed_unit(
+        parts = calculate_wall_fixed_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count,
             fixed_part_cm, settings
         )
     elif unit_type == "wall_flip_top_doors_bottom":
-        return calculate_wall_flip_top_doors_bottom_unit(
+        parts = calculate_wall_flip_top_doors_bottom_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count,
             flip_door_height, settings
         )
     elif unit_type == "tall_doors":
-        return calculate_tall_doors_unit(
+        parts = calculate_tall_doors_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count,
             bottom_door_height, settings
         )
     elif unit_type == "tall_doors_appliances":
-        return calculate_tall_doors_appliances_unit(
+        parts = calculate_tall_doors_appliances_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count, door_type,
             bottom_door_height, oven_height, microwave_height, vent_height, settings
         )
     elif unit_type == "corner_l_wall":
-        return calculate_corner_l_wall_unit(
+        parts = calculate_corner_l_wall_unit(
             width_cm, width_2_cm, height_cm, depth_cm, depth_2_cm,
             shelf_count, settings
         )
     elif unit_type == "tall_drawers_side_doors_top":
-        return calculate_tall_drawers_side_doors_top_unit(
+        parts = calculate_tall_drawers_side_doors_top_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count, door_type,
             drawer_count, drawer_height_cm, bottom_door_height, settings
         )
     elif unit_type == "tall_drawers_bottom_rail_top_doors":
-        return calculate_tall_drawers_bottom_rail_top_doors_unit(
+        parts = calculate_tall_drawers_bottom_rail_top_doors_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count, door_type,
             drawer_count, drawer_height_cm, bottom_door_height, settings
         )
     elif unit_type == "tall_drawers_side_appliances_doors":
-        return calculate_tall_drawers_side_appliances_doors_unit(
+        parts = calculate_tall_drawers_side_appliances_doors_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count, door_type,
             drawer_count, drawer_height_cm, bottom_door_height, oven_height,
             microwave_height, vent_height, settings
         )
     elif unit_type == "tall_drawers_bottom_appliances_doors_top":
-        return calculate_tall_drawers_bottom_appliances_doors_top_unit(
+        parts = calculate_tall_drawers_bottom_appliances_doors_top_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count, door_type,
             drawer_count, drawer_height_cm, bottom_door_height, oven_height,
             microwave_height, vent_height, settings
         )
     elif unit_type == "two_small_20_one_large_side":
-        return calculate_two_small_20_one_large_side_unit(
+        parts = calculate_two_small_20_one_large_side_unit(
             width_cm, height_cm, depth_cm, drawer_count, settings
         )
     elif unit_type == "two_small_20_one_large_bottom":
-        return calculate_two_small_20_one_large_bottom_unit(
+        parts = calculate_two_small_20_one_large_bottom_unit(
             width_cm, height_cm, depth_cm, drawer_count, settings
         )
     elif unit_type == "one_small_16_two_large_side":
-        return calculate_one_small_16_two_large_side_unit(
+        parts = calculate_one_small_16_two_large_side_unit(
             width_cm, height_cm, depth_cm, drawer_count, settings
         )
     elif unit_type == "one_small_16_two_large_bottom":
-        return calculate_one_small_16_two_large_bottom_unit(
+        parts = calculate_one_small_16_two_large_bottom_unit(
             width_cm, height_cm, depth_cm, drawer_count, settings
         )
     elif unit_type == "wall_microwave":
-        return calculate_wall_microwave_unit(
+        parts = calculate_wall_microwave_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count, door_type,
             microwave_height, settings
         )
     elif unit_type == "tall_wooden_base":
-        return calculate_tall_wooden_base_unit(
+        parts = calculate_tall_wooden_base_unit(
             width_cm, height_cm, depth_cm, shelf_count, door_count, settings
         )
     elif unit_type == "three_turbo":
-        return calculate_three_turbo_unit(
+        parts = calculate_three_turbo_unit(
             width_cm, height_cm, depth_cm, settings
         )
     elif unit_type == "drawer_built_in_oven":
-        return calculate_drawer_built_in_oven_unit(
+        parts = calculate_drawer_built_in_oven_unit(
             width_cm, height_cm, depth_cm, oven_height, settings
         )
     elif unit_type == "drawer_bottom_rail_built_in_oven":
-        return calculate_drawer_bottom_rail_built_in_oven_unit(
+        parts = calculate_drawer_bottom_rail_built_in_oven_unit(
             width_cm, height_cm, depth_cm, oven_height, settings
         )
     
     # TODO: إضافة باقي أنواع الوحدات
     else:
         raise ValueError(f"Unit type '{unit_type}' not implemented yet")
+
+    # تطبيق خصم الشريط (2 مم) إذا كان النوع المختار يتطلب ذلك
+    # الأنواع: O, OM, C, CM
+    if settings.edge_banding_type and settings.edge_banding_type.value in ["O", "OM", "C", "CM"]:
+        deduction = 0.2  # 2 mm = 0.2 cm
+        target_parts = ["base", "shelf", "internal_shelf", "top", "unit_top", "internal_base"]
+        
+        for part in parts:
+            if part.name in target_parts:
+                # خصم من العرض
+                if part.width_cm > deduction:
+                    part.width_cm = round(part.width_cm - deduction, 2)
+                
+                # خصم من الطول/العمق
+                if part.height_cm > deduction:
+                    part.height_cm = round(part.height_cm - deduction, 2)
+                
+                # إعادة حساب المساحة
+                part.area_m2 = round((part.width_cm * part.height_cm) / 10000, 4)
+
+    return parts
 
 
 def calculate_total_edge_band(parts: List[Part]) -> float:

@@ -19,6 +19,31 @@ class HandleType(str, Enum):
     HIDDEN_CL_CHASSIS = "hidden_cl_chassis"  # مقبض ارضي مخفي ( C-L ) علوي شاسية
     HIDDEN_CL_DROP = "hidden_cl_drop"  # مقبض ارضي مخفي ( C-L ) علوي ساقط
 
+class EdgeBandingType(str, Enum):
+    """نوع الشريط"""
+    NONE = "-"  # بدون
+    I = "I"  # شريط طول
+    L = "L"  # شريط ( طول + عرض )
+    L_M_RIGHT = "LM-يمين"  # شريط ( طول + عرض ) مفحار يمين (using slug safe value? usually enum values are sent as string)
+    C = "C"  # شريط ( طول + 2 عرض )
+    U = "U"  # شريط ( 2 طول + عرض )
+    O = "O"  # شريط داير
+    SLASH = "\\"  # شريط عرض
+    II = "II"  # شريط 2 طول
+    DOUBLE_SLASH = "\\\\"  # شريط 2 عرض
+    IM = "IM"  # شريط طول + مفحار عكس
+    CM = "CM"  # شريط ( طول + 2 عرض ) + مفحار عكس
+    UM_RIGHT = "UM-يمين"  # شريط ( 2 طول + عرض ) + مفحار يمين
+    IIM = "IIM"  # شريط 2 طول + مفحار مع الطول
+    SLASH_M = "\\M"  # شريط عرض + مفحار عكس
+    DOUBLE_SLASH_M = "\\\\M"  # شريط 2 عرض + مفحار مع العرض
+    OM = "OM"  # شريط داير + مفحار مع الطول
+    DR = "DR"  # شريط طول + مفحار درج بلوم
+    LL = "LL"  # وحدة زاوية حرف L
+    LS = "LS"  # وحدة ركنة مشطوفة
+    LLM = "LLM" # وحدة زاوية حرف L + مفحار
+    LSM = "LSM" # وحدة ركنة مشطوفة + مفحار
+
 class MaterialInfo(BaseModel):
     """معلومات الخامة"""
     price_per_sheet: Optional[float] = None
@@ -39,6 +64,12 @@ class SettingsModel(BaseModel):
     handle_type: HandleType = Field(
         default=HandleType.BUILT_IN,
         description="نوع المقبض"
+    )
+
+    # كود الشريط (Edge Banding Option)
+    edge_banding_type: EdgeBandingType = Field(
+        default=EdgeBandingType.NONE,
+        description="كود الشريط"
     )
     
     # ارتفاع قطاع المقبض (بيلت ان \ C &L)
@@ -162,6 +193,7 @@ class SettingsUpdate(BaseModel):
     """
     assembly_method: Optional[AssemblyMethod] = Field(default=None, description="طريقة التجميع")
     handle_type: Optional[HandleType] = Field(default=None, description="نوع المقبض")
+    edge_banding_type: Optional[EdgeBandingType] = Field(default=None, description="كود الشريط")
     handle_profile_height: Optional[float] = Field(default=None, description="ارتفاع قطاع المقبض")
     chassis_handle_drop: Optional[float] = Field(default=None, description="مقبض الشاسية / سقوط الضلفة")
     counter_thickness: Optional[float] = Field(default=None, description="سمك لوح الكونتر")
