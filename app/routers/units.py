@@ -777,69 +777,98 @@ async def export_unit_to_excel(unit_id: str, authorization: str = Header(None)):
         else:
             parts = []
         
-        # Create Excel workbook
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "تفاصيل الوحدة"
-        
-        # Set column headers with styling
-        headers = ["اسم القطعة", "العرض (سم)", "الارتفاع (سم)", "الكمية", "المساحة (م²)", "طول الحافة (م)"]
-        ws.append(headers)
-        
-        # Style the header row
-        header_font = Font(bold=True)
-        header_fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
-        header_alignment = Alignment(horizontal="center")
-        
-        for col in range(1, len(headers) + 1):
-            cell = ws.cell(row=1, column=col)
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = header_alignment
-        
-        # Add data rows
-        total_qty = 0
-        total_area = 0.0
-        total_edge = 0.0
+        # Categorize parts
+        main_parts = []
+        doors_parts = []
+        backs_parts = []
         
         for part in parts:
-            row = [
-                part.name,
-                part.width_cm,
-                part.height_cm,
-                part.qty,
-                round(part.area_m2, 2) if part.area_m2 else 0,
-                round(part.edge_band_m, 2) if part.edge_band_m else 0
-            ]
-            ws.append(row)
+            name_lower = part.name.lower()
+            if "door" in name_lower or "front" in name_lower:
+                doors_parts.append(part)
+            elif "back_panel" in name_lower:
+                backs_parts.append(part)
+            else:
+                main_parts.append(part)
+        
+        # Create Excel workbook
+        wb = Workbook()
+        
+        # Helper function to create sheet content
+        def create_sheet_content(ws, title, parts_list):
+            ws.title = title
+            ws.sheet_view.rightToLeft = True # Enable RTL
             
-            # Update totals
-            total_qty += part.qty
-            total_area += part.area_m2 or 0
-            total_edge += part.edge_band_m or 0
+            # Set column headers with styling
+            headers = ["اسم القطعة", "العرض (سم)", "الارتفاع (سم)", "الكمية", "المساحة (م²)", "طول الحافة (م)"]
+            ws.append(headers)
+            
+            # Style the header row
+            header_font = Font(bold=True)
+            header_fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
+            header_alignment = Alignment(horizontal="center")
+            
+            for col in range(1, len(headers) + 1):
+                cell = ws.cell(row=1, column=col)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = header_alignment
+                
+            # Add data rows
+            total_qty = 0
+            total_area = 0.0
+            total_edge = 0.0
+            
+            for part in parts_list:
+                row = [
+                    part.name,
+                    part.width_cm,
+                    part.height_cm,
+                    part.qty,
+                    round(part.area_m2, 2) if part.area_m2 else 0,
+                    round(part.edge_band_m, 2) if part.edge_band_m else 0
+                ]
+                ws.append(row)
+                
+                # Update totals
+                total_qty += part.qty
+                total_area += part.area_m2 or 0
+                total_edge += part.edge_band_m or 0
+            
+            # Add totals row
+            totals_row = ["المجموع", "", "", total_qty, round(total_area, 2), round(total_edge, 2)]
+            ws.append(totals_row)
+            
+            # Style the totals row
+            totals_font = Font(bold=True)
+            for col in range(1, len(totals_row) + 1):
+                cell = ws.cell(row=ws.max_row, column=col)
+                cell.font = totals_font
+            
+            # Auto-adjust column widths
+            for column in ws.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = (max_length + 2)
+                ws.column_dimensions[column_letter].width = adjusted_width
+
+        # Sheet 1: Main Parts (القطع الأساسية)
+        ws1 = wb.active
+        create_sheet_content(ws1, "القطع الأساسية", main_parts)
         
-        # Add totals row
-        totals_row = ["المجموع", "", "", total_qty, round(total_area, 2), round(total_edge, 2)]
-        ws.append(totals_row)
+        # Sheet 2: Backs (الضهر)
+        ws2 = wb.create_sheet("الضهر")
+        create_sheet_content(ws2, "الضهر", backs_parts)
         
-        # Style the totals row
-        totals_font = Font(bold=True)
-        for col in range(1, len(totals_row) + 1):
-            cell = ws.cell(row=ws.max_row, column=col)
-            cell.font = totals_font
-        
-        # Auto-adjust column widths
-        for column in ws.columns:
-            max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            adjusted_width = (max_length + 2)
-            ws.column_dimensions[column_letter].width = adjusted_width
+        # Sheet 3: Doors (الضلف)
+        ws3 = wb.create_sheet("الضلف")
+        create_sheet_content(ws3, "الضلف", doors_parts)
         
         # Save to bytes
         from io import BytesIO
@@ -847,9 +876,11 @@ async def export_unit_to_excel(unit_id: str, authorization: str = Header(None)):
         wb.save(excel_buffer)
         excel_buffer.seek(0)
         
+        print(f"DEBUG: Exporting unit {unit_id} with 3 sheets logic")
+
         # Return Excel file as response
         headers = {
-            "Content-Disposition": f"attachment; filename=unit_details_{unit_id}.xlsx",
+            "Content-Disposition": f"attachment; filename=unit_details_{unit_id}_v2.xlsx",
             "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         }
         
